@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+
+    #weather-info {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weather App</h1>
+
+  <button onclick="toggleTemperatureUnit()">Toggle Celsius/Fahrenheit</button>
+
+  <div id="weather-info"></div>
+
+  <script>
+    const weatherInfo = document.getElementById('weather-info');
+    let isCelsius = true;
+
+    function toggleTemperatureUnit() {
+      isCelsius = !isCelsius;
+      updateWeather();
+    }
+
+    function updateWeather() {
+      navigator.geolocation.getCurrentPosition(position => {
+        const { latitude, longitude } = position.coords;
+        const apiUrl = `https://weather-proxy.freecodecamp.rocks/api/current?lat=${latitude}&lon=${longitude}`;
+
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => displayWeather(data));
+      });
+    }
+
+    function displayWeather(weatherData) {
+      const temperature = isCelsius ? weatherData.main.temp : convertToFahrenheit(weatherData.main.temp);
+
+      weatherInfo.innerHTML = `
+        <p>Location: ${weatherData.name}, ${weatherData.sys.country}</p>
+        <p>Temperature: ${temperature} ${isCelsius ? '°C' : '°F'}</p>
+        <p>Description: ${weatherData.weather[0].description}</p>
+        <img src="${weatherData.weather[0].icon}" alt="Weather Icon">
+      `;
+    }
+
+    function convertToFahrenheit(celsius) {
+      return (celsius * 9/5) + 32;
+    }
+
+    // Initial weather update
+    updateWeather();
+  </script>
+</body>
+</html>
